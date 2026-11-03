@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>山本瑞葵さん専用｜卒論・文献レビュー＆マトリクス表 自動作成ツール</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      color: #fff;
+      padding: 18px 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .header-title p {
+      margin: 4px 0 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .quick-links a {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      text-decoration: none;
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: 0.15s;
+    }
+    .quick-links a:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .container {
+      max-width: 1280px;
+      margin: 20px auto 60px;
+      padding: 0 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tab-btn {
+      padding: 11px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 3px 8px rgba(37,99,235,0.25);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 1.12rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .banner {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 15px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #15803d; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-outline {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+    }
+    .btn-outline:hover { background: #f1f5f9; }
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+    .badge-keep { background: var(--success-light); color: #166534; }
+    .badge-exclude { background: var(--danger-light); color: #991b1b; }
+    .badge-info { background: #e0e7ff; color: #3730a3; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #334155;
+    }
+    tr.row-keep { background: #f0fdf4; }
+    tr.row-exclude { background: #fff5f5; }
+
+    .decision-group {
+      display: flex;
+      gap: 4px;
+    }
+    .decision-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .decision-btn.active-keep {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+    .decision-btn.active-exclude {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .field-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      display: none;
+      z-index: 999;
+    }
+    .filename-box {
+      background: #1e293b;
+      color: #38bdf8;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+    }
+    .reason-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .reason-chip {
+      font-size: 0.72rem;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+    .reason-chip:hover { background: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <h1>🎓 山本瑞葵さん専用｜卒論・文献レビュー＆マトリクス表 自動作成ツール</h1>
+      <p>PubMedの自動取得・1次スクリーニング判定・シート①/②へのワンクリック一括コピペがここ1つで完結します</p>
+    </div>
+    <div class="quick-links">
+      <a href="https://docs.google.com/spreadsheets/d/1RImRnck3GNVM8HmSAL-1AqZTZdh_c70G_iF1al8dAJk/edit" target="_blank">📊 02_文献管理スプレッドシートを開く</a>
+      <a href="https://drive.google.com/drive/folders/1Yj9RVPRkwE76bQ2lAP7Y00d9egH_v_OB" target="_blank">📁 98_文献PDFフォルダを開く</a>
+      <a href="https://docs.google.com/document/d/1N-zzHjqtZ0oDiXYP84oJsvJxIWcIv78alZpgM9ZcOig/edit" target="_blank">📄 11/3 MTG資料を開く</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab1')">📌 ① 今日入れた18件の判定＆一括コピペ（すぐ使える！）</button>
+    <button class="tab-btn" onclick="switchTab('tab2')">📊 ② シート①（マトリクス表）自動抽出＆作成アシスタント</button>
+    <button class="tab-btn" onclick="switchTab('tab3')">🔍 ③ PubMed 自動検索＆AI一括判定（19件目以降はこちら）</button>
+  </div>
+
+  <!-- TAB 1: 今日入れた18件の整理 -->
+  <div id="tab1" class="tab-content active">
+    <div class="card">
+      <h2>✨ 今日（11/3）シート②に入れてくれた18件の自動補完＆判定リスト</h2>
+      <div class="banner">
+        <strong>💡 使い方（3ステップでシート②が完成します！）</strong><br>
+        1. 下の表には、今日入れてくれた18件（No.14〜18の抜けていた著者名・発表年・URLもPubMedから自動補完済み！）と、日本語訳・AIおすすめ判定が入っています。<br>
+        2. 各行の <strong>「残す」「除外」ボタン</strong> と <strong>「除外理由」</strong> を確認・調整してください（No.3, 5, 8, 9, 12, 14, 15 の7本が「残す」候補の当たり論文です！）。<br>
+        3. 右下の <strong>「📋 シート②（A8セル〜）用に18件を一括コピー」</strong> を押し、スプレッドシートの『②調べた文献リスト』の <strong>A8セル</strong> をクリックして <code>Ctrl + V</code>（貼り付け）を押すと、18件すべてが一瞬で綺麗に埋まります！
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <div>
+          <span class="badge badge-keep" id="keepCountBadge">残す：7件</span>
+          <span class="badge badge-exclude" id="excludeCountBadge">除外：11件</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-success" onclick="copyInitial18ForSheet2()">📋 シート②（A8セル〜）用に18件を一括コピー</button>
+          <a class="btn btn-primary" href="https://docs.google.com/spreadsheets/d/1RImRnck3GNVM8HmSAL-1AqZTZdh_c70G_iF1al8dAJk/edit" target="_blank">📊 スプレッドシートを開いて貼り付ける ↗</a>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="initial18Table">
+          <thead>
+            <tr>
+              <th style="width:45px;">No.</th>
+              <th style="width:65px;">発表年</th>
+              <th style="width:130px;">著者名</th>
+              <th>論文タイトル（英語原題 ＆ 日本語訳・ポイント）</th>
+              <th style="width:135px;">1次判定<br>[残す / 除外]</th>
+              <th style="width:100px;">2次判定</th>
+              <th style="width:220px;">除外理由（クリックで簡単入力）</th>
+              <th style="width:120px;">シート①作成</th>
+            </tr>
+          </thead>
+          <tbody id="initial18Body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: シート①（マトリクス表）作成アシスタント -->
+  <div id="tab2" class="tab-content">
+    <div class="card">
+      <h2>📊 シート①（採択論文マトリクス表・全16列）作成アシスタント</h2>
+      <div class="banner">
+        <strong>💡 使い方：</strong><br>
+        ・まずは下の <strong>「🌟 お手本データ（No.12 Liu 2020 / No.15 NutriDiary 2025 / No.14 Millard 2023）」</strong> のボタンを押してみてください！PubMedの抄録から抽出したデータが自動セットされます。<br>
+        ・他の論文も、<strong>PMID（またはPubMed URL）</strong> を入れて「PubMedから取得」を押すと、<strong>PDFの保存ファイル名</strong> と <strong>AI抽出プロンプト</strong> が自動生成されます。<br>
+        ・最後に一番下の <strong>「📋 シート①の1行分としてコピー」</strong> を押して、スプレッドシート『①採択論文マトリクス表』のA列（A7セル〜）に <code>Ctrl + V</code> で貼り付けるだけで16列すべてがピタッと埋まります！
+      </div>
+
+      <div style="margin-bottom:16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <strong>🌟 今日見つけた当たり論文のお手本をワンクリック読込：</strong>
+        <button class="btn btn-primary" onclick="loadSampleMatrix('liu2020')">① No.12 Liu (2020) 高齢者×音声食事記録アプリ(SUS)</button>
+        <button class="btn btn-primary" onclick="loadSampleMatrix('klasen2025')">② No.15 Klasen (2025) NutriDiary食事記録アプリ(SUS 75点)</button>
+        <button class="btn btn-primary" onclick="loadSampleMatrix('millard2023')">③ No.14 Millard (2023) 音声食事・水分記録の受容性</button>
+        <button class="btn btn-outline" onclick="clearMatrixForm()">🔄 フォームを空にする</button>
+      </div>
+
+      <div class="card" style="background:#f8fafc;">
+        <div class="grid-3" style="align-items:end;">
+          <div>
+            <label class="field-label">PubMed PMID または URL から自動取得</label>
+            <input type="text" id="pmidInput" placeholder="例: 32985999 または https://pubmed.ncbi.nlm.nih.gov/32985999/" />
+          </div>
+          <div>
+            <label class="field-label">シート①の通し番号 (No.)</label>
+            <input type="text" id="m_no" value="1" />
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="fetchSinglePubMedForMatrix()" style="width:100%;">🔍 PubMedから論文情報＆抄録を自動取得</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label class="field-label">📁 『98_文献PDF』フォルダに保存する時のファイル名（自動生成・クリックでコピー）</label>
+          <div class="filename-box">
+            <span id="pdfFilenameDisplay">02_Liu(2020)_Design and Usability Evaluation of Mobile Voice-Added Food Reporting.pdf</span>
+            <button class="btn btn-outline" style="padding:4px 10px; font-size:0.78rem;" onclick="copyPdfFilename()">📋 ファイル名をコピー</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-warning" onclick="copyAiPromptForSinglePaper()">🤖 ① この論文のシート①抽出プロンプト（抄録つき）をコピー</button>
+          <button class="btn btn-outline" onclick="toggleAiPasteBox()">📥 ② ChatGPT / Gemini の返答を貼り付けて自動入力する</button>
+        </div>
+
+        <div id="aiPasteContainer" style="display:none; margin-top:12px;">
+          <label class="field-label">ChatGPT / Gemini が出力したテキストをここに貼り付けて「フォームに反映」を押してください</label>
+          <textarea id="aiResponseInput" rows="5" placeholder="1. 筆頭著者・発表年：...&#10;2. 論文タイトル：..."></textarea>
+          <button class="btn btn-success" style="margin-top:6px;" onclick="parseAiResponseToMatrix()">✨ フォームの各項目に自動反映する</button>
+        </div>
+      </div>
+
+      <h3 style="margin:16px 0 10px; font-size:1rem;">📝 シート①（採択論文マトリクス表）の16項目プレビュー＆編集</h3>
+      <div class="grid-3">
+        <div>
+          <label class="field-label">1. No.</label>
+          <input type="text" id="f_no" value="1" />
+        </div>
+        <div>
+          <label class="field-label">2. データベース</label>
+          <input type="text" id="f_db" value="PubMed" />
+        </div>
+        <div>
+          <label class="field-label">3. 筆頭著者・発表年</label>
+          <input type="text" id="f_author" oninput="updatePdfFilename()" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:10px;">
+        <div>
+          <label class="field-label">4. 論文タイトル</label>
+          <input type="text" id="f_title" oninput="updatePdfFilename()" />
+        </div>
+        <div>
+          <label class="field-label">16. 論文URL / DOI / PMID</label>
+          <input type="text" id="f_url" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label class="field-label">5. 国・地域</label>
+          <input type="text" id="f_country" />
+        </div>
+        <div>
+          <label class="field-label">6. 研究デザイン</label>
+          <input type="text" id="f_design" />
+        </div>
+        <div>
+          <label class="field-label">7. 対象者・人数・年齢</label>
+          <input type="text" id="f_Pop" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label class="field-label">8. アプリ名・記録方式（写真AI / 音声 / 手入力等）</label>
+          <input type="text" id="f_app" />
+        </div>
+        <div>
+          <label class="field-label">9. 使用期間</label>
+          <input type="text" id="f_duration" />
+        </div>
+        <div>
+          <label class="field-label">15. 該当RQ (RQ1 / RQ2 / RQ3)</label>
+          <input type="text" id="f_rq" value="RQ1, RQ2, RQ3" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:10px;">
+        <div>
+          <label class="field-label">10. 【RQ1】ユーザビリティ評価指標（SUS、MAUQ等）</label>
+          <textarea id="f_rq1_metric" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="field-label">11. 【RQ1】ユーザビリティスコア・結果（具体的な数値）</label>
+          <textarea id="f_rq1_score" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label class="field-label">12. 【RQ2】記録負担感・継続率・継続意向</label>
+          <textarea id="f_rq2_adh" rows="3"></textarea>
+        </div>
+        <div>
+          <label class="field-label">13. 【RQ2】使いやすさの強み・使いにくさの課題</label>
+          <textarea id="f_rq2_pros" rows="3"></textarea>
+        </div>
+        <div>
+          <label class="field-label">14. 【RQ3】専門職(管理栄養士等)の関与・サポート工夫</label>
+          <textarea id="f_rq3_sup" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-success" style="font-size:1rem; padding:12px 22px;" onclick="copyMatrixRowForSheet1()">📋 シート①の1行分としてコピー（スプシのA7セル〜にCtrl+Vで一発貼付！）</button>
+        <a class="btn btn-primary" href="https://docs.google.com/spreadsheets/d/1RImRnck3GNVM8HmSAL-1AqZTZdh_c70G_iF1al8dAJk/edit" target="_blank">📊 スプレッドシートのシート①を開く ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: PubMed 自動検索＆AI一括判定 -->
+  <div id="tab3" class="tab-content">
+    <div class="card">
+      <h2>🔍 PubMed 自動検索＆シート②自動作成（手作業コピペ不要！）</h2>
+      <div class="banner">
+        <strong>💡 1件ずつ手でコピペする必要はありません！</strong><br>
+        下の「PubMedから論文を自動取得する」ボタンを押すと、PubMedから直接論文リストを取り込み、キーワードに応じて自動で「残す候補」「除外候補」を仮判定します。そのままボタン1つでシート②に一括貼り付けできます！
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="field-label">検索式を選択（または編集）</label>
+        <div style="display:flex; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="setSearchQuery('focused')">🎯 おすすめ：本命絞り込み検索式（タイトル・抄録限定）</button>
+          <button class="btn btn-outline" onclick="setSearchQuery('broad')">🌐 元の検索式（265件）</button>
+        </div>
+        <textarea id="pubmedQueryBox" rows="2">("System Usability Scale"[Title/Abstract] OR "SUS"[Title/Abstract] OR "usability"[Title/Abstract] OR "MAUQ"[Title/Abstract] OR "user acceptance"[Title/Abstract]) AND ("dietary"[Title/Abstract] OR "nutrition"[Title/Abstract] OR "food log"[Title/Abstract] OR "food record"[Title/Abstract] OR "diet app"[Title/Abstract] OR "diet-tracking"[Title/Abstract]) AND ("app"[Title/Abstract] OR "mobile application"[Title/Abstract] OR "smartphone"[Title/Abstract] OR "mHealth"[Title/Abstract]) AND ("2015/01/01"[Date - Publication] : "2026/12/31"[Date - Publication])</textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="searchPubMedLive()">🚀 PubMedから論文リストを自動取得する（最大100件）</button>
+        <span id="searchStatus" style="font-weight:700; color:var(--primary);"></span>
+        <button class="btn btn-success" onclick="copyLiveResultsForSheet2()" id="copyLiveBtn" style="display:none;">📋 取得したリストをシート②用に一括コピー</button>
+        <button class="btn btn-warning" onclick="copyBatchPromptForLiveResults()" id="batchPromptBtn" style="display:none;">🤖 AI一括判定用プロンプトをコピー（10件ずつ）</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="liveSearchTable" style="display:none;">
+          <thead>
+            <tr>
+              <th style="width:45px;">No.</th>
+              <th style="width:65px;">発表年</th>
+              <th style="width:130px;">著者名</th>
+              <th>論文タイトル ＆ 自動キーワード判定ヒント</th>
+              <th style="width:135px;">1次判定</th>
+              <th style="width:210px;">除外理由</th>
+              <th style="width:110px;">シート①へ</th>
+            </tr>
+          </thead>
+          <tbody id="liveSearchBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">コピーしました！</div>
+
+<script>
+  // 今日みずきちゃんがシート②に入れた18件（No.14〜18の欠損データもPubMedから補完済み）
+  const initial18Papers = [
+    {
+      no: 1, db: "PubMed", year: "2023", author: "De Santis KK et al.",
+      title: "Digital Technologies for Health Promotion and Disease Prevention in Older People: Scoping Review",
+      jp: "高齢者の健康増進・疾病予防のためのデジタル技術：スコーピングレビュー",
+      hint: "⚠️ 総説（Scoping Review）のため原著論文ではない",
+      d1: "除外", d2: "-", reason: "レビュー論文（総説）のため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/36951896/", pmid: "36951896"
+    },
+    {
+      no: 2, db: "PubMed", year: "2021", author: "Murray B et al.",
+      title: "Accessible data curation and analytics for international-scale citizen science datasets",
+      jp: "国際規模の市民科学データセットのためのデータキュレーションと分析",
+      hint: "⚠️ 食事管理アプリのユーザビリティ研究ではない",
+      d1: "除外", d2: "-", reason: "食事管理アプリの研究ではないため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/34811392/", pmid: "34811392"
+    },
+    {
+      no: 3, db: "PubMed", year: "2021", author: "Mustafa N et al.",
+      title: "Malay Version of the mHealth App Usability Questionnaire (M-MAUQ): Translation, Adaptation, and Validation Study",
+      jp: "mHealthアプリユーザビリティ質問票（M-MAUQ）の翻訳・適応・妥当性検証研究",
+      hint: "🟢 mHealthアプリのユーザビリティ評価指標（MAUQ/SUS関連）の重要論文！",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/33538704/", pmid: "33538704"
+    },
+    {
+      no: 4, db: "PubMed", year: "2024", author: "Cruz-Cobo C et al.",
+      title: "Efficacy of a Mobile Health App (eMOTIVA) Regarding Compliance With Cardiac Rehabilitation Guidelines in Patients With Coronary Artery Disease: Randomized Controlled Clinical Trial",
+      jp: "冠動脈疾患患者の心臓リハビリガイドライン遵守（食事・運動等）に対するmHealthアプリ（eMOTIVA）の有効性とユーザビリティ：RCT",
+      hint: "🟢 生活習慣・食事遵守を含むmHealthアプリのRCT（要本文確認）",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/39052330/", pmid: "39052330"
+    },
+    {
+      no: 5, db: "PubMed", year: "2021", author: "Zečević M et al.",
+      title: "User Perspectives of Diet-Tracking Apps: Reviews Content Analysis and Topic Modeling",
+      jp: "食事記録（Diet-Tracking）アプリのユーザー視点：レビュー内容分析とトピックモデリング",
+      hint: "🟢 食事記録アプリの使いやすさ・継続課題に関するユーザー視点分析！",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/33885375/", pmid: "33885375"
+    },
+    {
+      no: 6, db: "PubMed", year: "2021", author: "Pai S et al.",
+      title: "Enhancing System Acceptance through User-Centred Design: Integrating Patient Generated Wellness Data",
+      jp: "ユーザー中心設計によるシステム受容性の向上：患者生成ウェルネスデータの統合",
+      hint: "⚠️ 医療情報統合システムの設計が主（食事アプリ特化ではない場合は除外）",
+      d1: "除外", d2: "-", reason: "食事管理アプリ単体の評価ではないため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/35009597/", pmid: "35009597"
+    },
+    {
+      no: 7, db: "PubMed", year: "2019", author: "Singh K et al.",
+      title: "Patients' and Nephrologists' Evaluation of Patient-Facing Smartphone Apps for CKD",
+      jp: "慢性腎臓病（CKD）患者向けスマートフォンアプリに対する患者と腎臓専門医の評価",
+      hint: "⚠️ 市販CKDアプリの品質評価（食事・水分管理機能を含むため要確認／除外も可）",
+      d1: "除外", d2: "-", reason: "CKD疾患管理全般のアプリ評価のため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/30898873/", pmid: "30898873"
+    },
+    {
+      no: 8, db: "PubMed", year: "2021", author: "Muhamat NA et al.",
+      title: "Development and usability testing of mobile application on diet and oral health",
+      jp: "食事と口腔健康に関するモバイルアプリの開発とユーザビリティテスト",
+      hint: "🟢 食事管理モバイルアプリのユーザビリティテスト論文！",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/34495979/", pmid: "34495979"
+    },
+    {
+      no: 9, db: "PubMed", year: "2021", author: "Meyer S et al.",
+      title: "Mobile Application for Promoting Gluten-Free Diet Self-Management in Adolescents with Celiac Disease: Proof-of-Concept Study",
+      jp: "セリアック病患者のグルテンフリー食事自己管理を促進するモバイルアプリの概念実証・ユーザビリティ研究",
+      hint: "🟢 食事自己管理アプリのユーザビリティ評価（対象が思春期のため残すか要相談）",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/33919430/", pmid: "33919430"
+    },
+    {
+      no: 10, db: "PubMed", year: "2022", author: "Werner NE et al.",
+      title: "Feasibility Testing of Tubes@HOME: A Mobile Application to Support Family-Delivered Enteral Care",
+      jp: "家族による在宅経管栄養ケアを支援するモバイルアプリ（Tubes@HOME）の実現可能性テスト",
+      hint: "⚠️ 在宅経管栄養（チューブケア）のアプリのため除外",
+      d1: "除外", d2: "-", reason: "在宅経管栄養ケアのアプリのため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/35670137/", pmid: "35670137"
+    },
+    {
+      no: 11, db: "PubMed", year: "2019", author: "Carmody JK et al.",
+      title: "Content and Usability Evaluation of Medication Adherence Mobile Applications for Use in Pediatrics",
+      jp: "小児科における服薬アドヒアランス・モバイルアプリの内容とユーザビリティ評価",
+      hint: "⚠️ 小児の「服薬管理」アプリのため除外",
+      d1: "除外", d2: "-", reason: "対象が小児かつ服薬管理アプリのため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/30358863/", pmid: "30358863"
+    },
+    {
+      no: 12, db: "PubMed", year: "2020", author: "Liu YC et al.",
+      title: "Design and Usability Evaluation of Mobile Voice-Added Food Reporting for Elderly People: Randomized Controlled Trial",
+      jp: "高齢者向け音声入力付きモバイル食事記録アプリの設計とユーザビリティ評価（SUS使用）：RCT",
+      hint: "🌟【超重要・大当たり！】高齢者57名を対象に音声食事記録アプリのSUS・入力時間・エラー率を評価したRCT！",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/32985999/", pmid: "32985999", sampleKey: "liu2020"
+    },
+    {
+      no: 13, db: "PubMed", year: "2024", author: "Lopes ROP et al.",
+      title: "Benchmarking mobile applications for the health of people with Diabetes Mellitus",
+      jp: "糖尿病患者の健康管理向けモバイルアプリのベンチマーク評価",
+      hint: "⚠️ アプリストア上の既存アプリの機能比較レビュー（人間対象の実験でない場合は除外）",
+      d1: "除外", d2: "-", reason: "既存アプリの機能比較のみで被験者評価がないため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/38985044/", pmid: "38985044"
+    },
+    {
+      no: 14, db: "PubMed", year: "2023", author: "Millard LAC et al.",
+      title: "Collecting Food and Drink Intake Data With Voice Input: Development, Usability, and Acceptability Study",
+      jp: "音声入力による食事・飲料摂取データの収集：開発・ユーザビリティ・受容性研究",
+      hint: "🌟【大当たり！】45名を対象に7日間の食事・水分記録を音声入力で行い、Web入力との一致率（60.1%）と継続意向（80%）を評価！",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/37000476/", pmid: "37000476", sampleKey: "millard2023"
+    },
+    {
+      no: 15, db: "PubMed", year: "2025", author: "Klasen L et al.",
+      title: "NutriDiary, a Smartphone-Based Dietary Record App: Description and Usability Evaluation",
+      jp: "スマートフォン食事記録アプリ「NutriDiary」の開発とユーザビリティ評価（SUS使用）",
+      hint: "🌟【超重要・大当たり！】18〜64歳の74名で食事記録アプリのSUSを評価（中央値75点、高齢層ほどSUSが低く入力時間が長いことを実証）！",
+      d1: "残す", d2: "採択", reason: "",
+      url: "https://pubmed.ncbi.nlm.nih.gov/39930984/", pmid: "39930984", sampleKey: "klasen2025"
+    },
+    {
+      no: 16, db: "PubMed", year: "2022", author: "Ahmadi M et al.",
+      title: "Development of a Mobile-Based Self-care Application for Patients with Breast Cancer-Related Lymphedema in Iran",
+      jp: "イランにおける乳がん関連リンパ浮腫患者向けモバイル自己管理アプリの開発",
+      hint: "⚠️ 乳がんリンパ浮腫ケアのアプリのため除外",
+      d1: "除外", d2: "-", reason: "乳がんリンパ浮腫ケアアプリのため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/36198310/", pmid: "36198310"
+    },
+    {
+      no: 17, db: "PubMed", year: "2024", author: "Rezaee R et al.",
+      title: "Design and usability evaluation of a mobile application for self-care among Iranian adolescents",
+      jp: "イランの思春期層向けセルフケア・モバイルアプリの設計とユーザビリティ評価",
+      hint: "⚠️ 思春期全般のセルフケアアプリのため除外",
+      d1: "除外", d2: "-", reason: "思春期全般のセルフケアアプリのため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/38528452/", pmid: "38528452"
+    },
+    {
+      no: 18, db: "PubMed", year: "2020", author: "Herzig D et al.",
+      title: "Volumetric Food Quantification Using Computer Vision on a Depth-Sensing Smartphone: Preclinical Study",
+      jp: "深度センサー付きスマホのコンピュータビジョンを用いた食品体積定量：前臨床研究",
+      hint: "⚠️ カメラの体積測定アルゴリズムの前臨床実験のみで、人間による使いやすさ評価がないため除外",
+      d1: "除外", d2: "-", reason: "画像計測精度の前臨床実験のみでユーザビリティ評価がないため除外",
+      url: "https://pubmed.ncbi.nlm.nih.gov/32209531/", pmid: "32209531"
+    }
+  ];
+
+  // お手本マトリクスデータ（シート①用）
+  const sampleMatrixData = {
+    liu2020: {
+      no: "1", db: "PubMed", author: "Liu et al. (2020)",
+      title: "Design and Usability Evaluation of Mobile Voice-Added Food Reporting for Elderly People: Randomized Controlled Trial",
+      country: "台湾", design: "ランダム化比較試験 (RCT)",
+      pop: "高齢者 57名（60〜90歳、男性12名・女性45名）／音声のみ群(VOR) 30名、音声＋ボタン群(VBR) 27名",
+      app: "音声入力付き食事記録モバイルアプリ（VOR：音声のみ入力 vs VBR：音声＋タッチ画面ボタン入力）",
+      duration: "単回試験（朝食・昼食・夕食を想定した17品目の記録テスト）",
+      rq1_metric: "SUS (System Usability Scale)、記録正確性（エラー率）、入力所要時間",
+      rq1_score: "両群ともSUSスコアがベンチマーク（基準値）を上回り、群間有意差なし（P=.20）。入力所要時間は「音声のみ群(VOR)」が有意に短かった（P<.001）。",
+      rq2_adh: "・「音声＋ボタン併用群(VBR)」はボタンタップ操作の失敗によるエラーが10.3%（39/378）発生し、音声のみ群より有意にエラーが多かった（P<.001）。\n・高齢者にはボタン操作を伴わない音声入力方式の方が短時間・低負担で記録可能。",
+      rq2_pros: "【強み】音声のみで料理内容を話す方式（VOR）は高齢者の操作エラーと入力時間を大幅に削減できる。\n【課題】タッチ画面のボタン操作（VBR）を組み合わせると、高齢者はボタンの押し忘れ・押し間違いが多発する（エラー率10.3%）。",
+      rq3_sup: "高齢者施設（リタイアメント・コミュニティ）にて7インチタブレットを用いて実施。高齢者の認知・身体特性に合わせ、画面タップ手順を減らしたユーザー中心設計（UCD）を採用。",
+      rq: "RQ1, RQ2, RQ3", url: "https://pubmed.ncbi.nlm.nih.gov/32985999/", pmid: "32985999"
+    },
+    klasen2025: {
+      no: "2", db: "PubMed", author: "Klasen et al. (2025)",
+      title: "NutriDiary, a Smartphone-Based Dietary Record App: Description and Usability Evaluation",
+      country: "ドイツ", design: "ユーザビリティ評価研究（横断的評価）",
+      pop: "成人 74名（18〜64歳、女性69%／栄養専門職・学生27名、一般人47名）",
+      app: "NutriDiary（テキスト検索・バーコード読取・自由入力によるスマートフォン秤量食事記録アプリ）",
+      duration: "2日間（1日分の秤量食事記録＋翌日に17品目のモデル献立入力）",
+      rq1_metric: "SUS (System Usability Scale, 0-100点)、1品目あたりの入力所要時間",
+      rq1_score: "・全体のSUS中央値：75点（四分位範囲 63〜88点）と良好なユーザビリティ。\n・回帰分析の結果、「年齢（高齢であること）」がSUSスコア低下の唯一の有意な予測因子であった（P<.001）。",
+      rq2_adh: "・1日分の食事記録の完了時間中央値は35分（IQR 19〜52分）。\n・大半の参加者が「従来の紙の食事記録よりもスマホアプリ（NutriDiary）の方が良い」と回答し高い受容性を示した。",
+      rq2_pros: "【強み】バーコード読取や検索機能により、紙の記録より好まれる。\n【課題】若年層（18〜30歳：1品目あたり中央値1.5分）に比べ、中高年層（45〜64歳：中央値1.8分）はデータ入力に有意に時間がかかり、年齢が高いほどSUSスコアが低下する。",
+      rq3_sup: "一般利用者と栄養学の専門職・学生の双方で検証。中高年層では入力時間が長くなりSUSが下がるため、年齢層に応じた入力補助や導入サポートの必要性が示唆された。",
+      rq: "RQ1, RQ2, RQ3", url: "https://pubmed.ncbi.nlm.nih.gov/39930984/", pmid: "39930984"
+    },
+    millard2023: {
+      no: "3", db: "PubMed", author: "Millard et al. (2023)",
+      title: "Collecting Food and Drink Intake Data With Voice Input: Development, Usability, and Acceptability Study",
+      country: "イギリス", design: "開発・ユーザビリティ・受容性評価研究",
+      pop: "大学教職員・学生 45名（有効回答37名、うち81%が20〜39歳、女性62%）",
+      app: "音声アシスタント（Amazon Alexaスキル）を用いた食事・飲料摂取リアルタイム記録システム vs Webフォーム入力",
+      duration: "7日間",
+      rq1_metric: "独自アンケート（操作経験・受容性評価）、Web記録との一致率（妥当性）",
+      rq1_score: "・Webフォーム記録と音声記録の食事内容の一致率は60.1%（357/588件）。\n・参加者の80%（28/35名）が「今後の研究でも音声入力システムを喜んで利用したい」と回答。",
+      rq2_adh: "・7日間の継続使用において、80%が高い継続利用意向を示した。\n・手入力の選択式アンケートに比べ、リアルタイムで手軽に食事・水分を報告できる点が評価された。",
+      rq2_pros: "【強み】ハンズフリーの音声入力により、日常生活の中でリアルタイムに食事・飲み物を記録しやすい。\n【課題】考えながら話して言葉が途切れると、システム（Alexa）が途中で割り込んでしまう問題が49%（17/35名）で頻発し、記録エラーの原因となった。",
+      rq3_sup: "対話型音声インターフェースの課題として「発話のポーズ（間）への待機設定」の改善や、Web確認フォームとの併用によるデータ補完が有効とされた。",
+      rq: "RQ1, RQ2", url: "https://pubmed.ncbi.nlm.nih.gov/37000476/", pmid: "37000476"
+    }
+  };
+
+  let liveSearchResults = [];
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', ['tab1','tab2','tab3'][idx] === tabId);
+    });
+    document.querySelectorAll('.tab-content').forEach(el => {
+      el.classList.toggle('active', el.id === tabId);
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3200);
+  }
+
+  function copyTextToClipboard(text, successMsg) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(successMsg || "クリップボードにコピーしました！");
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast(successMsg || "クリップボードにコピーしました！");
+    });
+  }
+
+  function renderInitial18() {
+    const tbody = document.getElementById('initial18Body');
+    tbody.innerHTML = '';
+    let keepCount = 0;
+    let excludeCount = 0;
+
+    initial18Papers.forEach((p, idx) => {
+      if (p.d1 === '残す') keepCount++; else excludeCount++;
+      const tr = document.createElement('tr');
+      tr.className = p.d1 === '残す' ? 'row-keep' : 'row-exclude';
+      tr.innerHTML = `
+        <td style="font-weight:700; text-align:center;">${p.no}</td>
+        <td><input type="text" value="${p.year}" onchange="initial18Papers[${idx}].year=this.value" style="width:60px;" /></td>
+        <td><input type="text" value="${p.author}" onchange="initial18Papers[${idx}].author=this.value" /></td>
+        <td>
+          <div style="font-weight:700; color:#0f172a; margin-bottom:3px;">
+            <a href="${p.url}" target="_blank" style="color:#1d4ed8; text-decoration:none;">${p.title} ↗</a>
+          </div>
+          <div style="font-size:0.8rem; color:#334155; margin-bottom:3px;">🇯🇵 <strong>和訳：</strong>${p.jp}</div>
+          <div style="font-size:0.78rem; font-weight:700; color:${p.d1==='残す'?'#15803d':'#b91c1c'};">${p.hint}</div>
+        </td>
+        <td>
+          <div class="decision-group">
+            <button class="decision-btn ${p.d1==='残す'?'active-keep':''}" onclick="setDecision18(${idx}, '残す')">🟢 残す</button>
+            <button class="decision-btn ${p.d1==='除外'?'active-exclude':''}" onclick="setDecision18(${idx}, '除外')">🔴 除外</button>
+          </div>
+        </td>
+        <td>
+          <select onchange="initial18Papers[${idx}].d2=this.value">
+            <option value="採択" ${p.d2==='採択'?'selected':''}>採択</option>
+            <option value="除外" ${p.d2==='除外'?'selected':''}>除外</option>
+            <option value="-" ${p.d2==='-'?'selected':''}>-</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" value="${p.reason}" placeholder="採択の場合は空欄でOK" onchange="initial18Papers[${idx}].reason=this.value" />
+          <div class="reason-chips">
+            <span class="reason-chip" onclick="setReason18(${idx}, '食事管理アプリの研究ではないため除外')">食事以外</span>
+            <span class="reason-chip" onclick="setReason18(${idx}, 'レビュー論文（総説）のため除外')">レビュー</span>
+            <span class="reason-chip" onclick="setReason18(${idx}, '対象が小児・思春期のため除外')">小児</span>
+            <span class="reason-chip" onclick="setReason18(${idx}, 'ユーザビリティ評価がないため除外')">評価なし</span>
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <button class="btn btn-primary" style="padding:5px 9px; font-size:0.76rem;" onclick="openPaperInTab2(${idx})">📊 シート①へ送る</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('keepCountBadge').textContent = `残す（採択候補）：${keepCount}件`;
+    document.getElementById('excludeCountBadge').textContent = `除外：${excludeCount}件`;
+  }
+
+  function setDecision18(idx, val) {
+    initial18Papers[idx].d1 = val;
+    if (val === '残す') {
+      initial18Papers[idx].d2 = '採択';
+      initial18Papers[idx].reason = '';
+    } else {
+      initial18Papers[idx].d2 = '-';
+      if (!initial18Papers[idx].reason) {
+        initial18Papers[idx].reason = '対象または評価内容が基準外のため除外';
+      }
+    }
+    renderInitial18();
+  }
+
+  function setReason18(idx, reasonText) {
+    initial18Papers[idx].d1 = '除外';
+    initial18Papers[idx].d2 = '-';
+    initial18Papers[idx].reason = reasonText;
+    renderInitial18();
+  }
+
+  function cleanCell(str) {
+    if (!str) return "";
+    return String(str).replace(/\r?\n/g, " ").replace(/\t/g, " ").trim();
+  }
+
+  function copyInitial18ForSheet2() {
+    // シート②の列: 通し番号 | データベース | 発表年 | 著者名 | 論文タイトル | 1次判定 | 2次判定 | 除外理由 | 論文URL
+    const rows = initial18Papers.map(p => [
+      p.no,
+      p.db,
+      p.year,
+      cleanCell(p.author),
+      cleanCell(p.title),
+      p.d1,
+      p.d2,
+      p.d1 === '残す' ? '（採択候補 → シート①へ）' : cleanCell(p.reason),
+      cleanCell(p.url)
+    ].join('\t'));
+    copyTextToClipboard(rows.join('\n'), "✅ 18件分のデータをコピーしました！スプレッドシート『②調べた文献リスト』の A8セル を選んで Ctrl+V で貼り付けてください！");
+  }
+
+  function openPaperInTab2(idx) {
+    const p = initial18Papers[idx];
+    switchTab('tab2');
+    if (p.sampleKey && sampleMatrixData[p.sampleKey]) {
+      loadSampleMatrix(p.sampleKey);
+    } else {
+      document.getElementById('pmidInput').value = p.pmid || p.url;
+      document.getElementById('f_no').value = p.no;
+      document.getElementById('f_db').value = p.db;
+      document.getElementById('f_author').value = `${p.author.split(' ')[0]} et al. (${p.year})`;
+      document.getElementById('f_title').value = p.title;
+      document.getElementById('f_url').value = p.url;
+      updatePdfFilename();
+      if (p.pmid) fetchSinglePubMedForMatrix();
+    }
+  }
+
+  function loadSampleMatrix(key) {
+    const d = sampleMatrixData[key];
+    if (!d) return;
+    document.getElementById('pmidInput').value = d.pmid;
+    document.getElementById('m_no').value = d.no;
+    document.getElementById('f_no').value = d.no;
+    document.getElementById('f_db').value = d.db;
+    document.getElementById('f_author').value = d.author;
+    document.getElementById('f_title').value = d.title;
+    document.getElementById('f_country').value = d.country;
+    document.getElementById('f_design').value = d.design;
+    document.getElementById('f_Pop').value = d.pop;
+    document.getElementById('f_app').value = d.app;
+    document.getElementById('f_duration').value = d.duration;
+    document.getElementById('f_rq1_metric').value = d.rq1_metric;
+    document.getElementById('f_rq1_score').value = d.rq1_score;
+    document.getElementById('f_rq2_adh').value = d.rq2_adh;
+    document.getElementById('f_rq2_pros').value = d.rq2_pros;
+    document.getElementById('f_rq3_sup').value = d.rq3_sup;
+    document.getElementById('f_rq').value = d.rq;
+    document.getElementById('f_url').value = d.url;
+    updatePdfFilename();
+    showToast("✨ お手本データをフォームに読み込みました！そのまま一番下のボタンからシート①用にコピーできます！");
+  }
+
+  function clearMatrixForm() {
+    ['f_author','f_title','f_country','f_design','f_Pop','f_app','f_duration','f_rq1_metric','f_rq1_score','f_rq2_adh','f_rq2_pros','f_rq3_sup','f_url'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    updatePdfFilename();
+  }
+
+  function updatePdfFilename() {
+    const no = String(document.getElementById('f_no').value || '1').padStart(2, '0');
+    const authorRaw = document.getElementById('f_author').value || 'Author(2024)';
+    const firstSurname = authorRaw.split(/\s+|et al/)[0].replace(/[^A-Za-z0-9\u3040-\u30ff\u4e00-\u9faf]/g, '') || 'Author';
+    const yearMatch = authorRaw.match(/\d{4}/);
+    const year = yearMatch ? yearMatch[0] : '2024';
+    const titleRaw = document.getElementById('f_title').value || 'Paper Title';
+    const cleanTitle = titleRaw.split(':')[0].replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 65);
+    const fname = `${no}_${firstSurname}(${year})_${cleanTitle}.pdf`;
+    document.getElementById('pdfFilenameDisplay').textContent = fname;
+  }
+
+  function copyPdfFilename() {
+    const txt = document.getElementById('pdfFilenameDisplay').textContent;
+    copyTextToClipboard(txt, "📁 PDF保存用のファイル名をコピーしました！");
+  }
+
+  let currentFetchedAbstract = "";
+
+  async function fetchSinglePubMedForMatrix() {
+    const raw = document.getElementById('pmidInput').value.trim();
+    const match = raw.match(/(\d{6,9})/);
+    if (!match) {
+      showToast("⚠️ PMID（7〜8桁の数字）またはPubMedのURLを入力してください");
+      return;
+    }
+    const pmid = match[1];
+    showToast("🔍 PubMedから論文情報とAbstractを取得中...");
+    try {
+      const sumUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=${pmid}`;
+      const sumRes = await fetch(sumUrl).then(r => r.json());
+      const item = sumRes.result && sumRes.result[pmid];
+      if (!item) throw new Error("Not found");
+
+      const year = (item.pubdate || "").slice(0, 4);
+      const firstAuthor = (item.sortfirstauthor || "Author").split(" ")[0];
+      const no = document.getElementById('m_no').value || "1";
+      document.getElementById('f_no').value = no;
+      document.getElementById('f_db').value = "PubMed";
+      document.getElementById('f_author').value = `${firstAuthor} et al. (${year})`;
+      document.getElementById('f_title').value = (item.title || "").replace(/\.$/, "");
+      document.getElementById('f_url').value = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
+      updatePdfFilename();
+
+      // Fetch XML for Abstract
+      const xmlUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=${pmid}`;
+      const xmlText = await fetch(xmlUrl).then(r => r.text());
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      const absNodes = xmlDoc.querySelectorAll("AbstractText");
+      currentFetchedAbstract = Array.from(absNodes).map(n => {
+        const lbl = n.getAttribute("Label");
+        return (lbl ? `[${lbl}] ` : "") + n.textContent;
+      }).join("\n");
+
+      showToast("✅ PubMedからタイトル・著者・Abstract全文を取得しました！「🤖プロンプトをコピー」を押してAIに投げられます！");
+    } catch (e) {
+      showToast("⚠️ PubMedからの取得に失敗しました。PMIDを確認してください。");
+    }
+  }
+
+  function copyAiPromptForSinglePaper() {
+    const author = document.getElementById('f_author').value;
+    const title = document.getElementById('f_title').value;
+    const prompt = `あなたは栄養学・医療情報学の研究アシスタントです。
+以下の論文情報（および添付したPDFまたは本文・抄録）を読み取り、卒業論文の「文献マトリクス表（シート①）」に記入するための13項目を日本語で簡潔に抽出してください。
+必ず以下の「1. 〜 13.」の番号と見出しをそのまま使って出力してください。
+
+1. 筆頭著者・発表年：${author}
+2. 論文タイトル：${title}
+3. 国・地域：
+4. 研究デザイン：
+5. 対象者・人数・年齢：
+6. アプリ名・記録方式：
+7. 使用期間：
+8. 【RQ1】ユーザビリティ評価指標：
+9. 【RQ1】ユーザビリティスコア・結果：
+10. 【RQ2】記録負担感・継続率・継続意向：
+11. 【RQ2】使いやすさの強み・使いにくさの課題：
+12. 【RQ3】専門職の関与・サポート工夫：
+13. 該当RQ：
+
+【対象論文のAbstract / 本文】
+Title: ${title}
+${currentFetchedAbstract || "（※ここに論文のAbstractまたは本文・PDFを貼り付けてください）"}`;
+
+    copyTextToClipboard(prompt, "🤖 AI抽出用プロンプト（論文情報つき）をコピーしました！ChatGPTやGeminiにそのまま貼り付けてください！");
+    document.getElementById('aiPasteContainer').style.display = 'block';
+  }
+
+  function toggleAiPasteBox() {
+    const el = document.getElementById('aiPasteContainer');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function parseAiResponseToMatrix() {
+    const text = document.getElementById('aiResponseInput').value;
+    if (!text.trim()) {
+      showToast("⚠️ ChatGPT/Geminiの返答テキストを貼り付けてください");
+      return;
+    }
+    const extractLine = (num) => {
+      const regex = new RegExp(`${num}\\.\\s*[^：:]+[：:]\\s*([\\s\\S]*?)(?=\\n\\d+\\.|$)`);
+      const m = text.match(regex);
+      return m ? m[1].trim() : "";
+    };
+    if (extractLine(1)) document.getElementById('f_author').value = extractLine(1);
+    if (extractLine(2)) document.getElementById('f_title').value = extractLine(2);
+    if (extractLine(3)) document.getElementById('f_country').value = extractLine(3);
+    if (extractLine(4)) document.getElementById('f_design').value = extractLine(4);
+    if (extractLine(5)) document.getElementById('f_Pop').value = extractLine(5);
+    if (extractLine(6)) document.getElementById('f_app').value = extractLine(6);
+    if (extractLine(7)) document.getElementById('f_duration').value = extractLine(7);
+    if (extractLine(8)) document.getElementById('f_rq1_metric').value = extractLine(8);
+    if (extractLine(9)) document.getElementById('f_rq1_score').value = extractLine(9);
+    if (extractLine(10)) document.getElementById('f_rq2_adh').value = extractLine(10);
+    if (extractLine(11)) document.getElementById('f_rq2_pros').value = extractLine(11);
+    if (extractLine(12)) document.getElementById('f_rq3_sup').value = extractLine(12);
+    if (extractLine(13)) document.getElementById('f_rq').value = extractLine(13);
+    updatePdfFilename();
+    showToast("✨ AIの回答を16項目すべてに自動反映しました！");
+  }
+
+  function copyMatrixRowForSheet1() {
+    // シート①の16列すべてをTSV形式で1行にする（セル内改行はダブルクォートで囲むとスプシの1セル内に綺麗に収まる）
+    const wrapCell = (val) => {
+      const s = String(val || "").replace(/"/g, '""').trim();
+      return (s.includes('\n') || s.includes('\t')) ? `"${s}"` : s;
+    };
+    const cols = [
+      document.getElementById('f_no').value,
+      document.getElementById('f_db').value,
+      document.getElementById('f_author').value,
+      document.getElementById('f_title').value,
+      document.getElementById('f_country').value,
+      document.getElementById('f_design').value,
+      document.getElementById('f_Pop').value,
+      document.getElementById('f_app').value,
+      document.getElementById('f_duration').value,
+      document.getElementById('f_rq1_metric').value,
+      document.getElementById('f_rq1_score').value,
+      document.getElementById('f_rq2_adh').value,
+      document.getElementById('f_rq2_pros').value,
+      document.getElementById('f_rq3_sup').value,
+      document.getElementById('f_rq').value,
+      document.getElementById('f_url').value
+    ].map(wrapCell);
+
+    copyTextToClipboard(cols.join('\t'), "✅ シート①の1行分（16列）をコピーしました！スプレッドシート『①採択論文マトリクス表』のA7セル（または空いている行のA列）を選んで Ctrl+V で貼り付けてください！");
+  }
+
+  function setSearchQuery(type) {
+    const box = document.getElementById('pubmedQueryBox');
+    if (type === 'focused') {
+      box.value = '("System Usability Scale"[Title/Abstract] OR "SUS"[Title/Abstract] OR "usability"[Title/Abstract] OR "MAUQ"[Title/Abstract] OR "user acceptance"[Title/Abstract]) AND ("dietary"[Title/Abstract] OR "nutrition"[Title/Abstract] OR "food log"[Title/Abstract] OR "food record"[Title/Abstract] OR "diet app"[Title/Abstract] OR "diet-tracking"[Title/Abstract]) AND ("app"[Title/Abstract] OR "mobile application"[Title/Abstract] OR "smartphone"[Title/Abstract] OR "mHealth"[Title/Abstract]) AND ("2015/01/01"[Date - Publication] : "2026/12/31"[Date - Publication])';
+    } else {
+      box.value = '("System Usability Scale" OR "SUS" OR "usability" OR "MAUQ" OR "user acceptance") AND ("diet" OR "dietary" OR "nutrition" OR "food log" OR "meal") AND ("app" OR "mobile application" OR "smartphone" OR "mHealth") AND ("2015/01/01"[Date - Publication] : "2026/12/31"[Date - Publication])';
+    }
+  }
+
+  function autoClassifyTitle(title) {
+    const t = title.toLowerCase();
+    if (t.includes('review') || t.includes('meta-analysis') || t.includes('protocol')) {
+      return { d1: '除外', d2: '-', reason: 'レビュー論文またはプロトコル論文のため除外', hint: '⚠️ レビュー/プロトコル論文の可能性大' };
+    }
+    if (t.includes('pediatric') || t.includes('children') || t.includes('infant') || t.includes('adolescent')) {
+      return { d1: '除外', d2: '-', reason: '対象が小児・思春期のため除外', hint: '⚠️ 対象が小児・思春期の可能性' };
+    }
+    if (t.includes('enteral') || t.includes('medication adherence') || t.includes('lymphedema')) {
+      return { d1: '除外', d2: '-', reason: '通常の食事管理アプリではないため除外', hint: '⚠️ 経管栄養・服薬・他疾患ケアの可能性' };
+    }
+    if ((t.includes('diet') || t.includes('nutrition') || t.includes('food') || t.includes('meal')) && (t.includes('usability') || t.includes('acceptability') || t.includes('app') || t.includes('smartphone') || t.includes('mhealth'))) {
+      return { d1: '残す', d2: '採択', reason: '', hint: '🟢 食事・栄養アプリ×ユーザビリティの有力候補！' };
+    }
+    return { d1: '残す', d2: '採択', reason: '', hint: '🔍 抄録を確認して判定してください' };
+  }
+
+  async function searchPubMedLive() {
+    const query = document.getElementById('pubmedQueryBox').value.trim();
+    const status = document.getElementById('searchStatus');
+    status.textContent = "⏳ PubMed APIから検索結果を取得中...";
+    try {
+      const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax=100&term=${encodeURIComponent(query)}`;
+      const searchRes = await fetch(searchUrl).then(r => r.json());
+      const totalCount = searchRes.esearchresult.count;
+      const idList = searchRes.esearchresult.idlist || [];
+
+      if (idList.length === 0) {
+        status.textContent = "ヒット件数: 0件";
+        return;
+      }
+
+      const sumUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=${idList.join(',')}`;
+      const sumRes = await fetch(sumUrl).then(r => r.json());
+
+      liveSearchResults = idList.map((id, idx) => {
+        const item = sumRes.result[id] || {};
+        const title = (item.title || "").replace(/\.$/, "");
+        const year = (item.pubdate || "").slice(0, 4);
+        const author = item.sortfirstauthor ? `${item.sortfirstauthor} et al.` : "";
+        const auto = autoClassifyTitle(title);
+        return {
+          no: idx + 1,
+          db: "PubMed",
+          year,
+          author,
+          title,
+          d1: auto.d1,
+          d2: auto.d2,
+          reason: auto.reason,
+          hint: auto.hint,
+          url: `https://pubmed.ncbi.nlm.nih.gov/${id}/`,
+          pmid: id
+        };
+      });
+
+      status.textContent = `✅ ヒット総数：${totalCount}件（上位${liveSearchResults.length}件を表示中）`;
+      document.getElementById('copyLiveBtn').style.display = 'inline-flex';
+      document.getElementById('batchPromptBtn').style.display = 'inline-flex';
+      document.getElementById('liveSearchTable').style.display = 'table';
+      renderLiveSearchTable();
+    } catch (e) {
+      status.textContent = "⚠️ 通信エラーが発生しました。インターネット接続を確認してください。";
+    }
+  }
+
+  function renderLiveSearchTable() {
+    const tbody = document.getElementById('liveSearchBody');
+    tbody.innerHTML = '';
+    liveSearchResults.forEach((p, idx) => {
+      const tr = document.createElement('tr');
+      tr.className = p.d1 === '残す' ? 'row-keep' : 'row-exclude';
+      tr.innerHTML = `
+        <td style="font-weight:700; text-align:center;">${p.no}</td>
+        <td>${p.year}</td>
+        <td>${p.author}</td>
+        <td>
+          <div style="font-weight:700;"><a href="${p.url}" target="_blank" style="color:#1d4ed8; text-decoration:none;">${p.title} ↗</a></div>
+          <div style="font-size:0.78rem; font-weight:700; color:${p.d1==='残す'?'#15803d':'#b91c1c'};">${p.hint}</div>
+        </td>
+        <td>
+          <div class="decision-group">
+            <button class="decision-btn ${p.d1==='残す'?'active-keep':''}" onclick="liveSearchResults[${idx}].d1='残す';liveSearchResults[${idx}].d2='採択';liveSearchResults[${idx}].reason='';renderLiveSearchTable()">🟢 残す</button>
+            <button class="decision-btn ${p.d1==='除外'?'active-exclude':''}" onclick="liveSearchResults[${idx}].d1='除外';liveSearchResults[${idx}].d2='-';renderLiveSearchTable()">🔴 除外</button>
+          </div>
+        </td>
+        <td>
+          <input type="text" value="${p.reason}" onchange="liveSearchResults[${idx}].reason=this.value" placeholder="除外理由" />
+        </td>
+        <td style="text-align:center;">
+          <button class="btn btn-primary" style="padding:4px 8px; font-size:0.75rem;" onclick="sendLivePaperToTab2(${idx})">📊 シート①へ</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function sendLivePaperToTab2(idx) {
+    const p = liveSearchResults[idx];
+    switchTab('tab2');
+    document.getElementById('pmidInput').value = p.pmid;
+    document.getElementById('m_no').value = p.no;
+    fetchSinglePubMedForMatrix();
+  }
+
+  function copyLiveResultsForSheet2() {
+    const rows = liveSearchResults.map(p => [
+      p.no, p.db, p.year, cleanCell(p.author), cleanCell(p.title),
+      p.d1, p.d2, p.d1 === '残す' ? '（採択候補 → シート①へ）' : cleanCell(p.reason), cleanCell(p.url)
+    ].join('\t'));
+    copyTextToClipboard(rows.join('\n'), `✅ ${liveSearchResults.length}件分のリストをコピーしました！シート②のA8セルに Ctrl+V で一括貼り付けできます！`);
+  }
+
+  function copyBatchPromptForLiveResults() {
+    const listText = liveSearchResults.slice(0, 15).map(p => `No.${p.no} (${p.year}) ${p.title}`).join('\n');
+    const prompt = `あなたは栄養学・モバイルヘルス分野の文献レビューを支援する研究アシスタントです。
+私の卒業論文のテーマは「食事管理・栄養管理スマートフォンアプリのユーザビリティ（SUS等）と利用継続性」です。
+以下の論文タイトル一覧について、それぞれ「日本語訳」「【残す】または【除外】の判定」「除外理由（除外の場合のみ20字以内）」を出力してください。
+
+${listText}`;
+    copyTextToClipboard(prompt, "🤖 上位15件のAI一括判定プロンプトをコピーしました！");
+  }
+
+  // 初期表示
+  renderInitial18();
+  loadSampleMatrix('liu2020');
+</script>
+</body>
+</html>
