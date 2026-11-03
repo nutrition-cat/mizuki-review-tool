@@ -390,7 +390,11 @@
           <div class="grid-3">
             <div>
               <label class="field-label">1. 通し番号 (No.)</label>
-              <input type="text" id="pdf_no" value="7" oninput="updateAutoFilename()" />
+              <div style="display:flex; gap:4px; align-items:center;">
+  <input type="text" id="pdf_no" value="1" oninput="updateAutoFilename()" style="text-align:center; font-weight:700;" />
+  <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem;" onclick="changeNo(-1)">-</button>
+  <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem;" onclick="changeNo(1)">+1</button>
+</div>
             </div>
             <div>
               <label class="field-label">2. データベース</label>
@@ -804,6 +808,15 @@ ${text.slice(0, 12000)}`;
     }
   }
 
+  
+  function changeNo(delta) {
+    const el = document.getElementById('pdf_no');
+    let val = parseInt(el.value) || 1;
+    val = Math.max(1, val + delta);
+    el.value = val;
+    updateAutoFilename();
+  }
+
   function updateAutoFilename() {
     const no = String(document.getElementById('pdf_no').value || '1').padStart(2, '0');
     const authorRaw = document.getElementById('pdf_author').value || 'Author(2024)';
@@ -845,7 +858,9 @@ ${text.slice(0, 12000)}`;
       document.getElementById('pdf_url').value
     ].map(wrapCell);
 
-    copyText(cols.join('\t'), "✅ シート①の1行分（16列）をコピーしました！スプレッドシート『①採択論文マトリクス表』の空いている行のA列を選んで Ctrl+V で貼り付けてください！");
+        copyText(cols.join('\t'), `✅ シート①のNo.${document.getElementById('pdf_no').value}用（16列）をコピーしました！スプレッドシートの該当行でCtrl+Vで貼り付けてください！`);
+    // Auto increment No for next paper!
+    changeNo(1);
   }
 
   function copyCurrentToSheet2() {
